@@ -3,7 +3,7 @@
 Welcome Old Chap!
 
 Let the world write Esperanto accents on the Web.
-Just like (Ek!)[http://www.esperanto.mv.ru/Ek/]
+Just like [Ek](http://www.esperanto.mv.ru/Ek/)!
 
 Author - Baptiste Darthenay
 
