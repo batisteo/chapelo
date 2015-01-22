@@ -1,0 +1,21 @@
+{
+	"name"         : "chapelo",
+	"version"      : "1.0.0",
+	"homepage"     : "https://github.com/nazar-pc/PickMeUp",
+	"authors"      : [
+		"Baptiste Darthenay <baptiste@darthenay.fr>"
+	],
+	"description"  : "Replace 'x' or 'h' by Esperanto letters with accent, as you type",
+	"main"         : [
+		"js/jquery.chapelo.js"
+	],
+	"keywords"     : [
+		"esperanto",
+		"accent",
+		"ĉapelo"
+	],
+	"license"      : "MIT",
+	"dependencies" : {
+		"jquery" : ">=1.6"
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"name"         : "chapelo",
+	"title"        : "chapelo",
+	"description"  : "Replace 'x' or 'h' by Esperanto letters with accent, as you type",
+	"keywords"     : [
+		"datepicker",
+		"date",
+		"calendar"
+	],
+	"version"      : "1.0.0",
+	"homepage"     : "https://github.com/batisteo/chapelo",
+	"author"       : {
+		"name"  : "Baptiste Darthenay",
+		"email" : "baptiste@darthenay.fr",
+	},
+	"maintainers"  : [
+		{
+			"name"  : "Baptiste Darthenay",
+			"email" : "baptiste@darthenay.fr",
+		}
+	],
+	"repository"   : {
+		"type" : "git",
+		"url"  : "git://github.com/batisteo/chapelo.git"
+	},
+	"licenses"     : [
+		{
+			"type" : "MIT",
+			"url"  : "https://github.com/batisteo/chapelo/blob/master/license.txt"
+		}
+	],
+	"bugs"         : "https://github.com/batisteo/chapelo/issues",
+	"docs"         : "https://github.com/batisteo/chapelo",
+	"demo"         : "http://batisteo.github.io/chapelo",
+	"download"     : "https://github.com/batisteo/chapelo",
+	"dependencies" : {
+		"jquery" : "*"
+	}
+}
