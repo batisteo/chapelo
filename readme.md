@@ -12,7 +12,7 @@ Browser support:
 * Opera 12.1+
 * Latest versions of Firefox and Chrome
 
-## [Demo](http://batisteo.github.io/Chapelo)
+## [Demo](http://batisteo.github.io/chapelo)
 
 ## Getting started
 You need only one file: `js/jquery.chapelo.min.js`
@@ -41,7 +41,7 @@ or with data-attributes with `chap-` prefix:
 ## Configuration options
 
 ##### suffixes
-Value: `array`
+Value type: `array`
 
 Default:
 ```javascript
@@ -51,7 +51,7 @@ suffixes: ["X", "x", "H", "h"]
 Description: List of characters which will replace the previous letter by the Unicode accented one.
 
 ##### selectors
-Value: `string`
+Value type: `string`
 
 Default:
 ```javascript
@@ -61,7 +61,7 @@ selectors: 'textarea, input[type="text"]'
 Description: jQuery selectors to filter the type of elements where Ĉapelo will apply.
 
 ##### alphabet
-Value: `object`
+Value type: `object`
 
 Default:
 ```javascript
@@ -83,12 +83,19 @@ alphabet: {
 
 Description: Dictionary of the letters that will be replaced if a suffix is typed after it.
 
+
+## Known limitations
+
+- The user can't choose wheather the letters have to be replaced or not.
+- The prefixes are not supported yet (for example: ^c -> ĉ).
+
+
 ## Contribution 
 Feel free to create issues and send pull requests, they are highly appreciated!
 
 Before reporting an issue, be so kind to prepare reproducible example on jsfiddle.net, please.
 
-You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/owuzg3qt](http://jsfiddle.net/owuzg3qt/)
+You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/owuzg3qt/3/](http://jsfiddle.net/owuzg3qt/3/)
 
 ## License
 MIT License, see license.txt
