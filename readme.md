@@ -97,7 +97,7 @@ Feel free to create issues and send pull requests, they are highly appreciated!
 
 Before reporting an issue, be so kind to prepare reproducible example on jsfiddle.net, please.
 
-You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/owuzg3qt/3/](http://jsfiddle.net/owuzg3qt/3/)
+You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/tpxg3Loh](http://jsfiddle.net/tpxg3Loh/)
 
 ## License
 MIT License, see license.txt
