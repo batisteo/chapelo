@@ -1,5 +1,7 @@
 ## Ĉapelo - jQuery Esperanto accents plugin
 
+![logo](logo.png)
+
 Welcome Old Chap!
 
 Let the world write Esperanto accents on the Web.
