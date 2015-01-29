@@ -23,22 +23,44 @@
         "u": "ŭ"
     }
 
-    var suffixes = ["X", "x", "H", "h"];
+    var suffixes = ["X", "x", "H", "h", "^"];
 
     var selectors = 'textarea, input[type="text"]';
 
 
     /*** Utility functions ***/
 
+    function escape(char) {
+        var toEscape = ["^", "."];
+        if (toEscape.indexOf(char) > -1) {
+            return "\\" + char;
+        }
+        return char;
+    }
+
     function getRegex(alphabet, suffixes) {
         var str = "";
         suffixes.forEach(function(suffix){
             for (var letter in alphabet) {
-                str += letter + suffix + "|";
+                str += letter + escape(suffix) + "|";
             }
         });
-        str = str.substring(0, str.length - 1);
+        str = str.slice(0, -1);
         return new RegExp('('+ str +')', 'g');
+    }
+
+    function is_on(element) {
+        return element.prop('checked') !== false;
+    }
+
+    function must_replace(field) {
+        if (!is_on($('#chap-general-toggle'))) {
+            return false;
+        }
+        if ($(field).hasClass('chap-off')) {
+            return false;
+        }
+        return true;
     }
 
     function encode(regex, alphabet) {
@@ -63,6 +85,10 @@
     }
 
 
+
+
+    /*** jQuery plugin ***/
+
     $.fn.chapelo = function(settings) {
         var options = $.extend({
             alphabet: alphabet,
@@ -75,15 +101,57 @@
 
         return this.filter(options.selectors)
                    .add(this.find(options.selectors))
-                   .each(function() {
+                   .each(function()
+        {
             $(this).keyup(function(e) {
-                options.encode.call(
-                    this,
-                    regex,
-                    options.alphabet
-                    );
+                if (must_replace(this)) {
+                    options.encode.call(
+                        this,
+                        regex,
+                        options.alphabet
+                        );
+                }
             });
         });
     };
 })(jQuery);
 
+
+$(function () {
+
+    /*** Checkbox helpers ***/
+
+    function chapToggleField() {
+        // Add and remove class "chap-off"
+        var checkbox = $(this);
+
+        var fieldID = checked.data("chap-toggle-id");
+        if (fieldID !== undefined) {
+            field = $('#'+fieldID);
+            field.toggleClass('chap-off', !checkbox.prop('checked'));
+        }
+
+        var fieldClass = checked.data("chap-toggle");
+        if (fieldClass != undefined) {
+            fields = $('.'+fieldClass);
+            fields.each(function() {
+                $(this).toggleClass('chap-off', !checkbox.prop('checked'))
+                    .trigger('chapChange', checkbox.prop('checked'));
+            });
+        }
+    }
+
+    $('input:checkbox').each(chapToggleField);    // On page load
+    $('input:checkbox').change(chapToggleField);  // On click
+
+    $('textarea, input[type="text"]').on('chapChange', function(e, isActive) {
+        var checkbox = $('[data-chap-toggle-id="' + $(this).attr('id') +'"]');
+        checkbox.prop('checked', isActive);
+    });
+
+    $('#chap-general-toggle').on("change switchChange.bootstrapSwitch", function() {
+        var checked = $(this).prop('checked');
+        $('.chap-field-toggle').prop("checked", checked);
+        $('.chap-field-toggle').prop("disabled", !checked);
+    });
+});
