@@ -1,21 +1,19 @@
-## Ĉapelo - jQuery plugin for Esperanto accents
+# Ĉapelo
 
-![logo](logo.png)
+### jQuery plugin for Esperanto accents
 
-Welcome Old Chap!
+![logo](chapelo.png)
+
+### Welcome Old Chap!
 
 Let the world write Esperanto accents on the Web.
-Just like [Ek](http://www.esperanto.mv.ru/Ek/)!
+Just like [Ek](http://www.esperanto.mv.ru/Ek/) but for your fields!
 
-Browser support:
-* IE 10+
-* Opera 12.1+
-* Latest versions of Firefox and Chrome
 
 ## Demo
 
 - [batisteo.github.io/chapelo](https://batisteo.github.io/chapelo/)
-- [JSFiddle](http://jsfiddle.net/tpxg3Loh/)
+- [JSFiddle](http://jsfiddle.net/L1xuc3aq/)
 
 ## Getting started
 You need only one file: `js/jquery.chapelo.min.js`
@@ -27,7 +25,7 @@ $('textarea').chapelo();
 
 or:
 ```javascript
-$('.chap').chapelo();
+$('form.chap').chapelo();
 ```
 
 Global default settings are stored in `$.chapelo`
@@ -51,10 +49,10 @@ or with data-attributes with `chap-` prefix:
 You can add controls to let the user choose using Ĉapelo or not. Theese controls are simple checkboxes.
 
 #### Globally
-Add this checkbox in your page with the id `chap-global-toggle`.
+Add this checkbox in your page with the id `chap-general-toggle`.
 
 ```html
-<input type="checkbox" id="chap-global-toggle" checked />
+<input type="checkbox" id="chap-general-toggle" checked />
 ```
 
 This control have the priority over all controls: if this checkbox in unchecked, Ĉapelo is disabled on the whole page.
@@ -129,10 +127,15 @@ Description: Dictionary of the letters that will be replaced if a suffix is type
 
 
 ## Known limitations
-
 - The prefixes are not supported yet (for example: ^c -> ĉ).
 - Autoreplace of au -> aŭ or eu -> eŭ not supported yet.
 - ~~The user can't choose wheather the letters have to be replaced or not.~~ (Added in 1.1)
+
+
+## Browser support
+- IE 9+
+- Opera 12.1+
+- Latest versions of Firefox and Chrome
 
 
 ## Contribute
@@ -140,7 +143,7 @@ Feel free to create issues and send pull requests, they are highly appreciated!
 
 Before reporting an issue, be so kind to prepare reproducible example on jsfiddle.net, please.
 
-You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/tpxg3Loh](http://jsfiddle.net/tpxg3Loh/)
+You can start with working demo of latest stable version of Ĉapelo: [jsfiddle.net/L1xuc3aq](http://jsfiddle.net/L1xuc3aq/)
 
 
 ## Authors

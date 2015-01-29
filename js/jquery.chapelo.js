@@ -1,5 +1,6 @@
 /**
 * @package Chapelo - jQuery Esperanto accents plugin
+* @version 1.1.1
 * @author Baptiste Darthenay <baptiste@darthenay.fr>
 * @copyright Copyright (c) 2015, Baptiste Darthenay
 * @license MIT License, see license.txt
@@ -49,12 +50,9 @@
         return new RegExp('('+ str +')', 'g');
     }
 
-    function is_on(element) {
-        return element.prop('checked') !== false;
-    }
-
     function must_replace(field) {
-        if (!is_on($('#chap-general-toggle'))) {
+        var generalOff = $('#chap-general-toggle').prop('checked') === false;
+        if (generalOff) {
             return false;
         }
         if ($(field).hasClass('chap-off')) {
@@ -85,17 +83,15 @@
     }
 
 
-
-
     /*** jQuery plugin ***/
 
-    $.fn.chapelo = function(settings) {
+    $.fn.chapelo = function(initial_options) {
         var options = $.extend({
             alphabet: alphabet,
             suffixes: suffixes,
             selectors: selectors,
             encode: encode
-        }, options);
+        }, initial_options);
 
         var regex = getRegex(options.alphabet, options.suffixes);
 
@@ -125,14 +121,14 @@ $(function () {
         // Add and remove class "chap-off"
         var checkbox = $(this);
 
-        var fieldID = checked.data("chap-toggle-id");
+        var fieldID = checkbox.data("chap-toggle-id");
         if (fieldID !== undefined) {
             field = $('#'+fieldID);
             field.toggleClass('chap-off', !checkbox.prop('checked'));
         }
 
-        var fieldClass = checked.data("chap-toggle");
-        if (fieldClass != undefined) {
+        var fieldClass = checkbox.data("chap-toggle");
+        if (fieldClass !== undefined) {
             fields = $('.'+fieldClass);
             fields.each(function() {
                 $(this).toggleClass('chap-off', !checkbox.prop('checked'))
@@ -145,13 +141,15 @@ $(function () {
     $('input:checkbox').change(chapToggleField);  // On click
 
     $('textarea, input[type="text"]').on('chapChange', function(e, isActive) {
+        // Toggle checkbox state when the field is changed
         var checkbox = $('[data-chap-toggle-id="' + $(this).attr('id') +'"]');
         checkbox.prop('checked', isActive);
     });
 
     $('#chap-general-toggle').on("change switchChange.bootstrapSwitch", function() {
+        // Toggle and disable all chap-field-toggle checkboxes along with general toggle
         var checked = $(this).prop('checked');
-        $('.chap-field-toggle').prop("checked", checked);
         $('.chap-field-toggle').prop("disabled", !checked);
+        $('.chap-field-toggle').prop("checked", checked).change();
     });
 });
