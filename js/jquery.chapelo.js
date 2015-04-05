@@ -26,59 +26,116 @@
 
     var suffixes = ["X", "x", "H", "h", "^"];
 
+    var diphthongs = {
+        "AU": "AŬ",
+        "EU": "EŬ",
+        "Au": "Aŭ",
+        "Eu": "Eŭ",
+        "au": "aŭ",
+        "eu": "eŭ"
+    }
+
     var selectors = 'textarea, input[type="text"]';
+
+    var specialRegexChars = ["^", "."];
 
 
     /*** Utility functions ***/
 
-    function escape(char) {
-        var toEscape = ["^", "."];
-        if (toEscape.indexOf(char) > -1) {
+    escapeChar = function(char) {
+        if (specialRegexChars.indexOf(char) > -1) {
             return "\\" + char;
         }
         return char;
     }
 
-    function getRegex(alphabet, suffixes) {
-        var str = "";
-        suffixes.forEach(function(suffix){
-            for (var letter in alphabet) {
-                str += letter + escape(suffix) + "|";
+
+    function Chapelo(field, alphabet, suffixes, diphthongs) {
+
+        this.field = field,
+        this.alphabet = alphabet,
+        this.suffixes = suffixes,
+        this.diphthongs = diphthongs,
+        this.caretPosition = this.field.selectionStart,
+        this.switchedOff = $('#chap-general-toggle').prop('checked') === false,
+
+
+        this.getRegex = function(dict, list) {
+            var regex = "";
+            if (list) {
+                list.forEach(function(suffix){
+                    for (var letter in dict) {
+                        regex += letter + escapeChar(suffix) + "|";
+                    }
+                });
+            } else {
+                for (var diphthong in dict) {
+                    regex += diphthong + "|";
+                }
             }
-        });
-        str = str.slice(0, -1);
-        return new RegExp('('+ str +')', 'g');
-    }
+            
+            regex = regex.slice(0, -1);
+            return new RegExp('('+ regex +')', 'g');
+        },
 
-    function must_replace(field) {
-        var generalOff = $('#chap-general-toggle').prop('checked') === false;
-        if (generalOff) {
-            return false;
-        }
-        if ($(field).hasClass('chap-off')) {
-            return false;
-        }
-        return true;
-    }
 
-    function encode(regex, alphabet) {
-        // Replace prefixed Esperanto character with its Unicode equivalent
-        var text = this.value;
-
-        if (text.match(regex)) {
-            var caretPosition = this.selectionStart;
-            var textBefore = this.value.slice(0, caretPosition + 1);
-            var match = textBefore.match(regex);
-
-            this.value = text.replace(regex, function(match){
-                return alphabet[match[0]];
-            });
-
-            if (match) {
-                // Repositioning the caret
-                this.selectionStart = caretPosition - match.length;
-                this.selectionEnd = this.selectionStart;
+        this.mustReplace = function(type) {
+            if ($(this.field).hasClass('chap-'+ type +'-off')) {
+                return false;
             }
+            return true;
+        },
+
+
+        this.setCaret = function(text, regex, caretPosition, isDiphthong) {
+            // Repositioning the caret
+            var textBefore = text.slice(0, caretPosition + 1);
+            var matches = textBefore.match(regex);
+            var delta = 0;
+            if (matches) {
+                if (isDiphthong) {
+                    delta = matches.length * 2;
+                } else {
+                    delta = matches.length;
+                }
+            }
+            this.caretPosition = caretPosition - delta;
+        },
+
+
+        this.encode = function(match, a, index, string) {
+            return alphabet[match[0]];
+        };
+        
+        this.encodeDiphthong = function(match, a, index, string) {
+            return diphthongs[match];
+        };
+
+
+        this.replaceAll = function() {
+            // Replace prefixed Esperanto character with its Unicode equivalent
+            if (this.switchedOff || !this.mustReplace('field')) { return }
+
+            if (this.mustReplace('suffix')) {
+                var text = this.field.value;
+                var regex = this.getRegex(this.alphabet, this.suffixes);
+                if (text.match(regex)) {
+                    this.field.value = text.replace(regex, this.encode);
+                    this.setCaret(text, regex, this.caretPosition);
+                }
+            }
+
+            if (this.mustReplace('diphthong')) {
+                var text = this.field.value;
+                var regexDiphthong = this.getRegex(this.diphthongs);
+                if (text.match(regexDiphthong)) {
+                    this.field.value = text.replace(regexDiphthong, this.encodeDiphthong);
+                    this.setCaret(text, regex, this.caretPosition, true);
+                }
+            }
+
+            this.field.selectionStart = this.caretPosition;
+            this.field.selectionEnd = this.caretPosition;
         }
     }
 
@@ -89,24 +146,16 @@
         var options = $.extend({
             alphabet: alphabet,
             suffixes: suffixes,
+            diphthongs: diphthongs,
             selectors: selectors,
-            encode: encode
+            specialRegexChars: specialRegexChars
         }, initial_options);
-
-        var regex = getRegex(options.alphabet, options.suffixes);
 
         return this.filter(options.selectors)
                    .add(this.find(options.selectors))
-                   .each(function()
-        {
+                   .each(function() {
             $(this).keyup(function(e) {
-                if (must_replace(this)) {
-                    options.encode.call(
-                        this,
-                        regex,
-                        options.alphabet
-                        );
-                }
+                new Chapelo(this, options.alphabet, options.suffixes, options.diphthongs).replaceAll();
             });
         });
     };
@@ -118,20 +167,20 @@ $(function () {
     /*** Checkbox helpers ***/
 
     function chapToggleField() {
-        // Add and remove class "chap-off"
+        // Add and remove class "chap-field-off"
         var checkbox = $(this);
 
         var fieldID = checkbox.data("chap-toggle-id");
         if (fieldID !== undefined) {
             field = $('#'+fieldID);
-            field.toggleClass('chap-off', !checkbox.prop('checked'));
+            field.toggleClass('chap-field-off', !checkbox.prop('checked'));
         }
 
         var fieldClass = checkbox.data("chap-toggle");
         if (fieldClass !== undefined) {
             fields = $('.'+fieldClass);
             fields.each(function() {
-                $(this).toggleClass('chap-off', !checkbox.prop('checked'))
+                $(this).toggleClass('chap-field-off', !checkbox.prop('checked'))
                     .trigger('chapChange', checkbox.prop('checked'));
             });
         }
