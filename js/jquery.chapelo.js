@@ -1,10 +1,11 @@
 /**
 * @package Chapelo - jQuery Esperanto accents plugin
-* @version 1.1.1
+* @version 2.0.0
 * @author Baptiste Darthenay <baptiste@darthenay.fr>
 * @copyright Copyright (c) 2015, Baptiste Darthenay
 * @license MIT License, see license.txt
 */
+
 (function ($) {
 
     /*** Default options ***/
@@ -24,7 +25,11 @@
         "u": "ŭ"
     }
 
-    var suffixes = ["X", "x", "H", "h", "^"];
+    var eo = ["Ĉ", "Ĝ", "Ĥ", "Ĵ", "Ŝ", "Ŭ", "ĉ", "ĝ", "ĥ", "ĵ", "ŝ", "ŭ"]
+
+    var prefixes = ["^"]
+
+    var suffixes = ["X", "x", "H", "h", "^"]
 
     var diphthongs = {
         "AU": "AŬ",
@@ -35,170 +40,105 @@
         "eu": "eŭ"
     }
 
-    var selectors = 'textarea, input[type="text"]';
-
-    var specialRegexChars = ["^", "."];
+    var selectors = 'textarea, input[type="text"]'
 
 
-    /*** Utility functions ***/
-
-    escapeChar = function(char) {
-        if (specialRegexChars.indexOf(char) > -1) {
-            return "\\" + char;
-        }
-        return char;
+    function Chapelo(field, alphabet, prefixes, suffixes, diphthongs) {
+        this.field = field;
+        this.alphabet = alphabet;
+        this.prefixes = prefixes;
+        this.suffixes = suffixes;
+        this.diphthongs = diphthongs;
     }
 
+    Chapelo.prototype.pair = function() {
+        this.text = this.field.value;
+        this.pos = this.field.selectionStart;
+        return this.text.slice(this.pos -2, this.pos);
+    }
 
-    function Chapelo(field, alphabet, suffixes, diphthongs) {
+    Chapelo.prototype.affix = function (pair) {
+        if (this.prefixes.indexOf(pair[0]) > -1) {
+            return this.alphabet[pair[1]]
+        }
+        if (this.suffixes.indexOf(pair[1]) > -1) {
+            return this.alphabet[pair[0]]
+        }
+    }
 
-        this.field = field,
-        this.alphabet = alphabet,
-        this.suffixes = suffixes,
-        this.diphthongs = diphthongs,
-        this.caretPosition = this.field.selectionStart,
-        this.switchedOff = $('#chap-general-toggle').prop('checked') === false,
+    Chapelo.prototype.diphthong = function (pair) {
+        return this.diphthongs[pair]
+    }
 
+    Chapelo.prototype.caret = function (delta) {
+        this.field.selectionStart = this.pos - delta;
+        this.field.selectionEnd = this.pos - delta;
+    };
 
-        this.getRegex = function(dict, list) {
-            var regex = "";
-            if (list) {
-                list.forEach(function(suffix){
-                    for (var letter in dict) {
-                        regex += letter + escapeChar(suffix) + "|";
-                    }
-                });
-            } else {
-                for (var diphthong in dict) {
-                    regex += diphthong + "|";
-                }
+    Chapelo.prototype.replace = function(pair, replaced) {
+        var beginning = this.text.slice(0, this.pos -2);
+        var end = this.text.slice(this.pos);
+        this.field.value = beginning + replaced + end;
+
+        this.last = {
+            "pair": pair,
+            "replaced": replaced
+        }
+
+        this.caret(pair.length - replaced.length);
+    }
+
+    Chapelo.prototype.cancel = function(pair) {
+        if (eo.indexOf(pair[1]) > -1) {
+            this.replace(this.last["replaced"], this.last["pair"])
+        }
+    };
+
+    Chapelo.prototype.keyup = function(key) {
+        var pair = this.pair();
+        if (key.key === 'Backspace') {
+            this.cancel(pair)
+        } else {
+            var diphthonged = this.diphthong(pair);
+            var affixed = this.affix(pair);
+            if (diphthonged) {
+                this.replace(pair, diphthonged)
+            } else if (affixed) {
+                this.replace(pair, affixed)
             }
-            
-            regex = regex.slice(0, -1);
-            return new RegExp('('+ regex +')', 'g');
-        },
-
-
-        this.mustReplace = function(type) {
-            if ($(this.field).hasClass('chap-'+ type +'-off')) {
-                return false;
-            }
-            return true;
-        },
-
-
-        this.setCaret = function(text, regex, caretPosition, isDiphthong) {
-            // Repositioning the caret
-            var textBefore = text.slice(0, caretPosition + 1);
-            var matches = textBefore.match(regex);
-            var delta = 0;
-            if (matches) {
-                if (isDiphthong) {
-                    delta = matches.length * 2;
-                } else {
-                    delta = matches.length;
-                }
-            }
-            this.caretPosition = caretPosition - delta;
-        },
-
-
-        this.encode = function(match, a, index, string) {
-            return alphabet[match[0]];
-        };
-        
-        this.encodeDiphthong = function(match, a, index, string) {
-            return diphthongs[match];
-        };
-
-
-        this.replaceAll = function() {
-            // Replace prefixed Esperanto character with its Unicode equivalent
-            if (this.switchedOff || !this.mustReplace('field')) { return }
-
-            if (this.mustReplace('suffix')) {
-                var text = this.field.value;
-                var regex = this.getRegex(this.alphabet, this.suffixes);
-                if (text.match(regex)) {
-                    this.field.value = text.replace(regex, this.encode);
-                    this.setCaret(text, regex, this.caretPosition);
-                }
-            }
-
-            if (this.mustReplace('diphthong')) {
-                var text = this.field.value;
-                var regexDiphthong = this.getRegex(this.diphthongs);
-                if (text.match(regexDiphthong)) {
-                    this.field.value = text.replace(regexDiphthong, this.encodeDiphthong);
-                    this.setCaret(text, regex, this.caretPosition, true);
-                }
-            }
-
-            this.field.selectionStart = this.caretPosition;
-            this.field.selectionEnd = this.caretPosition;
         }
     }
 
 
-    /*** jQuery plugin ***/
 
+    // jQuery plugin
     $.fn.chapelo = function(initial_options) {
         var options = $.extend({
             alphabet: alphabet,
+            prefixes: prefixes,
             suffixes: suffixes,
             diphthongs: diphthongs,
-            selectors: selectors,
-            specialRegexChars: specialRegexChars
+            selectors: selectors
         }, initial_options);
 
         return this.filter(options.selectors)
                    .add(this.find(options.selectors))
                    .each(function() {
-            $(this).keyup(function(e) {
-                new Chapelo(this, options.alphabet, options.suffixes, options.diphthongs).replaceAll();
-            });
-        });
-    };
-})(jQuery);
-
-
-$(function () {
-
-    /*** Checkbox helpers ***/
-
-    function chapToggleField() {
-        // Add and remove class "chap-field-off"
-        var checkbox = $(this);
-
-        var fieldID = checkbox.data("chap-toggle-id");
-        if (fieldID !== undefined) {
-            field = $('#'+fieldID);
-            field.toggleClass('chap-field-off', !checkbox.prop('checked'));
-        }
-
-        var fieldClass = checkbox.data("chap-toggle");
-        if (fieldClass !== undefined) {
-            fields = $('.'+fieldClass);
-            fields.each(function() {
-                $(this).toggleClass('chap-field-off', !checkbox.prop('checked'))
-                    .trigger('chapChange', checkbox.prop('checked'));
-            });
-        }
+                       chapeligu(this, options);
+                   })
     }
 
-    $('input:checkbox').each(chapToggleField);    // On page load
-    $('input:checkbox').change(chapToggleField);  // On click
+    var chapeligu = function(field, options) {
+        var chapelo = new Chapelo(
+            field,
+            options.alphabet,
+            options.prefixes,
+            options.suffixes,
+            options.diphthongs)
 
-    $('textarea, input[type="text"]').on('chapChange', function(e, isActive) {
-        // Toggle checkbox state when the field is changed
-        var checkbox = $('[data-chap-toggle-id="' + $(this).attr('id') +'"]');
-        checkbox.prop('checked', isActive);
-    });
+        $(field).keyup(function(key) {
+            chapelo.keyup(key);
+        });
+    };
 
-    $('#chap-general-toggle').on("change switchChange.bootstrapSwitch", function() {
-        // Toggle and disable all chap-field-toggle checkboxes along with general toggle
-        var checked = $(this).prop('checked');
-        $('.chap-field-toggle').prop("disabled", !checked);
-        $('.chap-field-toggle').prop("checked", checked).change();
-    });
-});
+})(jQuery);
