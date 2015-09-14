@@ -127,6 +127,8 @@
                 this.replace(letter, this.reversed[letter] + this.last.suffix);
             } else if (this.last.prefix) {
                 this.replace(letter, this.last.prefix + this.reversed[letter]);
+            } else {
+                this.replace(letter, this.reversed[letter]);
             }
             this.last = {prefix: "", suffix: ""};
             key.preventDefault();
