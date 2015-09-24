@@ -45,6 +45,7 @@
         }
         this.last = {prefix: "", suffix: ""};
         this.re = new RegExp(escape(this.regex()), 'g');
+        this.active = true;
     }
 
     Chapelo.prototype.regex = function() {
@@ -115,7 +116,7 @@
 
     Chapelo.prototype.replaceAll = function() {
         var chapelo = this;
-        this.field.value = this.text.replace(this.re, function(match) {
+        this.field.value = this.field.value.replace(this.re, function(match) {
             return chapelo.encode(match);
         });
     };
@@ -137,9 +138,9 @@
 
     Chapelo.prototype.isLetter = function(key) {
         var letter = String.fromCharCode(key.keyCode);
-        var pref = this.prefixes.join("");
-        var suff = this.suffixes.join("");
-        var re = new RegExp('['+ escape('a-zA-Z '+pref+suff) +']');
+        var prefix = this.prefixes.join("");
+        var suffix = this.suffixes.join("");
+        var re = new RegExp('['+ escape('a-zA-Z '+ prefix + suffix) +']');
 
         if (re.test(letter)) {
             return true;
@@ -147,29 +148,32 @@
     };
 
     Chapelo.prototype.keydown = function(key) {
-        var pair = this.pair();
-        var codes = {Backspace: 8, Enter: 13};
+        if (this.active) {
+            var codes = {Backspace: 8, Enter: 13};
 
-        // Backspace key cancels
-        if (key.keyCode === codes.Backspace) {
-            this.cancel(key, pair);
-        }
+            // Backspace key cancels
+            if (key.keyCode === codes.Backspace) {
+                this.cancel(key, this.pair());
+            }
 
-        // Ctrl+Enter replace all
-        if (key.keyCode === codes.Enter && key.ctrlKey) {
-            this.replaceAll();
+            // Alt+Enter replace all
+            if (key.keyCode === codes.Enter && key.altKey) {
+                this.replaceAll();
+            }
         }
     };
 
     Chapelo.prototype.keyup = function(key) {
-        var pair = this.pair();
-        if (this.isLetter(key)) {
-            var diphthonged = this.diphthong(pair);
-            var affixed = this.affix(pair);
-            if (diphthonged) {
-                this.replace(pair, diphthonged);
-            } else if (affixed) {
-                this.replace(pair, affixed);
+        if (this.active) {
+            var pair = this.pair();
+            if (this.isLetter(key)) {
+                var diphthonged = this.diphthong(pair);
+                var affixed = this.affix(pair);
+                if (diphthonged) {
+                    this.replace(pair, diphthonged);
+                } else if (affixed) {
+                    this.replace(pair, affixed);
+                }
             }
         }
     };
@@ -193,7 +197,7 @@
     };
 
     var chapeligu = function(field, options) {
-        var chapelo = new Chapelo(
+        field.chapelo = new Chapelo(
             field,
             options.prefixes,
             options.suffixes,
@@ -202,12 +206,44 @@
         );
 
         $(field).keydown(function(key) {
-            chapelo.keydown(key);
+            field.chapelo.keydown(key);
         });
 
         $(field).keyup(function(key) {
-            chapelo.keyup(key);
+            field.chapelo.keyup(key);
         });
     };
 
 })(jQuery);
+
+
+// Helpers
+$(function () {
+    function toggle() {
+        var checkbox = $(this);
+        var field = $('#' + checkbox.data('chap-field-id'));
+        if (field[0]) {
+            field[0].chapelo.active = checkbox.prop('checked');
+        }
+    }
+
+    $('input:checkbox').each(toggle).change(toggle);
+    
+    $('textarea, input[type="text"], input[type="search"]').on('chapChange', function(e, isActive) {
+        // Toggle checkbox state when the field is changed
+        var checkbox = $('[data-chap-field-id="' + $(this).attr('id') +'"]');
+        checkbox.prop('checked', isActive);
+    });
+
+    $('#chap-general-toggle').on("change switchChange.bootstrapSwitch", function() {
+        // Toggle and disable all chap-field-toggle checkboxes along with general toggle
+        var checked = $(this).prop('checked');
+        $('textarea, input[type="text"], input[type="search"]').each(function() {
+            if (this.chapelo !== undefined) {
+                this.chapelo.active = checked;
+            }
+        })
+        $('.chap-field-toggle').prop("disabled", !checked);
+        $('.chap-field-toggle').prop("checked", checked).change();
+    });
+});
