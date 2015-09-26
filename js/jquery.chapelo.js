@@ -36,6 +36,8 @@
         return reversed;
     }
 
+    var codes = {Backspace: 8, Enter: 13, h: 72, x: 88};
+
     function Chapelo(field, prefixes, suffixes, alphabet, diphthongs) {
         this.field = field;
         this.prefixes = prefixes.split("");
@@ -156,11 +158,14 @@
 
     Chapelo.prototype.keydown = function(key) {
         if (this.active) {
-            var codes = {Backspace: 8, Enter: 13};
-
             // Backspace key cancels
             if (key.keyCode === codes.Backspace) {
                 this.cancel(key, this.pair());
+            }
+            // Keys 'x' or 'h' can cancel
+            if (key.keyCode === codes[this.last.suffix.toLowerCase()]) {
+                this.cancel(key, this.pair());
+                this.lock = key.keyCode;
             }
 
             // Alt+Enter hotkey replaces all
@@ -171,6 +176,10 @@
     };
 
     Chapelo.prototype.keyup = function(key) {
+        if (this.lock === key.keyCode) {
+            delete this.lock;
+            return;
+        }
         if (this.active && this.isLetter(key)) {
             var pair = this.pair();
             var diphthonged = this.diphthong(pair);
@@ -200,7 +209,6 @@
         $(field).keyup(function(key) {
             field.chapelo.keyup(key);
         });
-        console.log(field);
     };
 
 
