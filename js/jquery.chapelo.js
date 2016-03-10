@@ -49,6 +49,7 @@
         this.last = {prefix: "", suffix: ""};
         this.re = new RegExp(escape(this.regex()), 'g');
         this.active = true;
+        this.div = field.getAttribute('contenteditable');
     }
 
     Chapelo.prototype.regex = function() {
@@ -85,9 +86,17 @@
     };
 
     Chapelo.prototype.pair = function() {
-        // Get the to character just before the caret
+        // Get the to two characters just before the caret
+        if (this.div) {
+            this.field.normalize();
+            this.text = this.field.textContent;
+            this.sel = window.getSelection();
+            this.range = this.sel.getRangeAt(0);
+            this.range.setStart(this.range.startContainer, this.range.startOffset - 2);
+            return this.range.toString();
+        }
         this.text = this.field.value;
-        this.pos = this.field.selectionStart;
+        this.pos = this.field.selectionEnd;
         return this.text.slice(this.pos - 2, this.pos);
     };
 
@@ -116,11 +125,17 @@
 
     Chapelo.prototype.replace = function(pair, replaced) {
         // Rewrite the field content with replaced character
-        var beginning = this.text.slice(0, this.pos - pair.length);
-        var end = this.text.slice(this.pos);
-        this.field.value = beginning + replaced + end;
-        // and replace the caret
-        this.caret(pair.length - replaced.length);
+        if (this.div) {
+            this.range.deleteContents();
+            this.range.insertNode(document.createTextNode(replaced));
+            this.field.normalize();  // 'merge' TextNodes
+        } else {
+            var beginning = this.text.slice(0, this.pos - pair.length);
+            var end = this.text.slice(this.pos);
+            this.field.value = beginning + replaced + end;
+            // and reposition the caret
+            this.caret(pair.length - replaced.length);
+        }
     };
 
     Chapelo.prototype.replaceAll = function() {
@@ -149,7 +164,7 @@
 
     Chapelo.prototype.isLetter = function(key) {
         // Returns true if the typed char is within A-z and affixes
-        var letter = String.fromCharCode(key.keyCode);
+        var letter = String.fromCharCode(key.which);
         var prefix = this.prefixes.join("");
         var suffix = this.suffixes.join("");
         var re = new RegExp('['+ escape('a-zA-Z '+ prefix + suffix) +']');
@@ -159,24 +174,24 @@
     Chapelo.prototype.keydown = function(key) {
         if (this.active) {
             // Backspace key cancels
-            if (key.keyCode === codes.Backspace) {
+            if (key.which === codes.Backspace) {
                 this.cancel(key, this.pair());
             }
             // Keys 'x' or 'h' can cancel
-            if (key.keyCode === codes[this.last.suffix.toLowerCase()]) {
+            if (key.which === codes[this.last.suffix.toLowerCase()]) {
                 this.cancel(key, this.pair());
-                this.lock = key.keyCode;
+                this.lock = key.which;
             }
 
             // Alt+Enter hotkey replaces all
-            if (key.keyCode === codes.Enter && key.altKey) {
+            if (key.which === codes.Enter && key.altKey) {
                 this.replaceAll();
             }
         }
     };
 
     Chapelo.prototype.keyup = function(key) {
-        if (this.lock === key.keyCode) {
+        if (this.lock === key.which) {
             delete this.lock;
             return;
         }
@@ -186,8 +201,11 @@
             var affixed = this.affix(pair);
             if (diphthonged) {
                 this.replace(pair, diphthonged);
-            } else if (affixed) {
+                } else if (affixed) {
                 this.replace(pair, affixed);
+            }
+            if (this.div) {
+              this.range.collapse();
             }
         }
     };
