@@ -197,7 +197,7 @@
     };
 
 
-    Chapelo.prototype.keypress = function(key) {
+    Chapelo.prototype.keydown = function(key) {
         if (!this.active) { return; }
         this.typedChar = String.fromCharCode(key.which);
         
@@ -247,8 +247,8 @@
             options.modifier
         );
 
-        $(field).keypress(function(key) {
-            field.chapelo.keypress(key);
+        $(field).keydown(function(key) {
+            field.chapelo.keydown(key);
         });
     };
 
@@ -270,4 +270,4 @@
                        chapeligu(this, options);
                    });
     };
-})(jQuery||Zepto);
+})(jQuery);
