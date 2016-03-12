@@ -7,7 +7,7 @@
 		"date",
 		"calendar"
 	],
-	"version"      : "1.1.1",
+	"version"      : "2.0.0",
 	"homepage"     : "https://github.com/batisteo/chapelo",
 	"author"       : {
 		"name"  : "Baptiste Darthenay",

@@ -1,4 +1,4 @@
-# <img alt='Welcome Old Chap!' src="img/logo_chapelo_md.png" srcset="img/logo_chapelo_md.png, img/logo_chapelo.png 2x"> Ĉapelo
+# [Ĉapelo]("img/chapelo.svg")
 
 
 ## La ŝika jQuery kromaĵo por la Esperantaj supersignoj
@@ -9,8 +9,8 @@ Similas al [Ek](http://www.esperanto.mv.ru/Ek/) por retpaĝoj.
 
 ### Kiaj uzi Ĉapelon?
 
-- Anstataŭas sufiksojn (`x`, `h`, `^`), prefiksojn (`^`), kaj diftongojn (`au` -> `aŭ`) apriore
-- Funkcias sur la tekstkampoj `<input type='text'>` kaj aliaj similaj HTML5 kampoj, tekstareoj `<textarea>` kaj *sufiĉe bone* eĉ sur la riĉaj tekstkampoj `<div contenteditable='true'>`!
+- Anstataŭas sufiksojn (`x`, `h`, `^`), prefiksojn (`^`), kaj diftongojn (`au` → `aŭ`) apriore
+- Funkcias sur la tekstkampoj `<input type="text">` kaj aliaj similaj HTML5 kampoj, tekstareoj `<textarea>` kaj *sufiĉe bone* eĉ sur la riĉaj tekstkampoj `<div contenteditable="true">`!
 - Eblas anstataŭigi tutan kampon per <kbd>Alt</kbd> + <kbd>Enter</kbd> (sur multaj kroziloj eblas malfari per <kbd>Ctrl</kbd> + <kbd>Z</kbd>)
 - Tre agordema, vidu la [opciojn](#agordoj)
 
@@ -135,7 +135,7 @@ $('input#sufiksoj').keyup(function() {
 ```
 
 
-## Krozilaj subtenoj
+## Subtenitaj kroziloj
 
 - Firefox
 - Chrome
@@ -153,7 +153,7 @@ Bonvolu testi kaj testadi!
 Ne hezitu aldoni [novan cimon](https://github.com/batisteo/chapelo/issues/new) aŭ krei [tirpeton](https://github.com/batisteo/chapelo/pulls)!
 
 
-# Alternativoj
+## Alternativoj
 
 - **x2eo** de la [Studio GAUS](http://www.studiogaus.com), trovebla sur [vortaro.net](http://vortaro.net/js/3/common.js), GPL
 
