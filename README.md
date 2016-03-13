@@ -1,4 +1,4 @@
-# ![Ĉapelo](https://cdn.rawgit.com/batisteo/chapelo/master/img/chapelo.svg)
+# ![Ĉapelo](https://cdn.rawgit.com/batisteo/chapelo/1395fd8/img/chapelo.svg)
 
 
 ## La ŝika jQuery kromaĵo por la Esperantaj supersignoj
