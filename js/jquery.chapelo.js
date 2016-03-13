@@ -40,7 +40,7 @@
     function leftExpanded(range) {
         try { range.setStart(range.startContainer, range.startOffset-1); }
         catch (IndexSizeError) {
-            console.log('Chapelo: Faild to expand range on this ContentEditable field');
+            console.error('Chapelo: Faild to expand range on this ContentEditable field');
         }
         return range;
     }
@@ -56,8 +56,7 @@
         this.modifier = modifier;
 
         this.alfabeto = reverse(alphabet);
-        this.last = {prefix: "", suffix: ""};
-        this.re = new RegExp(escape(this.regex()), 'g');
+        this.last = {prefix: '', suffix: ''};
         this.active = true;
         this.div = field.getAttribute('contenteditable');
     }
@@ -66,7 +65,7 @@
         // Build the regex string for replacing a whole field, looks like:
         // "(cx|sx|Cx|Sx|CX|SX|ch|sh|Ch|Sh|CH|SH|…)"
         var chapelo = this;
-        var reDiphthong = Object.keys(this.diphthongs).join('|');
+        // var reDiphthong = Object.keys(this.diphthongs).join('|');
 
         var reSuffix = this.suffixes.map(function(suffix) {
             return Object.keys(chapelo.alphabet).map(function(letter) {
@@ -161,12 +160,14 @@
 
     Chapelo.prototype.replaceAll = function() {
         // Replace from a Regex all occurences in the field
-        var chapelo = this;
         if (this.div) {
-            console.log('Chapelo: replaceAll on ContentEditable field is not supported');
+            console.info('Chapelo: replaceAll on ContentEditable field is not supported');
             return;
         }
-        this.field.value = this.field.value.replace(this.re, function(match) {
+        
+        var chapelo = this;
+        var regex = new RegExp(escape(this.regex()), 'g');
+        this.field.value = this.field.value.replace(regex, function(match) {
             return chapelo.encode(match);
         });
     };
@@ -199,7 +200,8 @@
 
     Chapelo.prototype.keydown = function(key) {
         if (!this.active) { return; }
-        this.typedChar = String.fromCharCode(key.which);
+        var keyCode = (key.shiftKey) ? key.which : key.which + 32;
+        this.typedChar = String.fromCharCode(keyCode);
         
         // Backspace key cancels
         if (key.which === codes.Backspace) {
@@ -212,6 +214,7 @@
         }
         // Alt+Enter hotkey replaces all
         if (key.which === codes.Enter && key[this.modifier + 'Key']) {
+            key.preventDefault();
             this.replaceAll();
         }
         if (this.lock === key.which) {
